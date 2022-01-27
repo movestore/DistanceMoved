@@ -1,0 +1,158 @@
+{
+  "settings":[ 
+    {
+  "id": "distMeasure",
+  "name": "Distance to be calculated",
+  "description": "Either the the sum of the lenghts of all segments per the chosen time interval below (Cumulative distance), or, the distance between the 1st and last point per chosen time interval below (Net displacement).",
+  "type": "RADIOBUTTONS",
+  "defaultValue": null,
+  "options": [{
+      "value": "cumulativeDist",
+      "displayText": "Cumulative distance"
+    },
+    {
+      "value": "netDisplacement",
+      "displayText": "Net displacement"
+    }]
+},
+    {
+  "id": "time_unit",
+  "name": "Time unit",
+  "description": "The unit of the time interval for which the distance will be calculated. If 'ALL' is selected, than the distance will be calculated for the entire tracking period",
+  "type": "DROPDOWN",
+  "defaultValue": "day", 
+  "options": [{
+      "value": "second",
+      "displayText": "Seconds"
+    },
+    {
+      "value": "minute",
+      "displayText": "Minutes"
+    },
+    {
+      "value": "hour",
+      "displayText": "Hours"
+    },
+    {
+      "value": "day",
+      "displayText": "Days"
+    },
+    {
+      "value": "month",
+      "displayText": "Month"
+    },
+    {
+      "value": "year",
+      "displayText": "Years"
+    },
+    {
+      "value": "all",
+      "displayText": "ALL"
+    }]
+},
+{
+  "id": "time_numb",
+  "name": "Time length",
+  "description": "The length of the time unit above. The time interval can be for example '5 minutes', '12 hours', '3 month', '1 year', etc. If 'ALL' is selected in the 'Time unit' above, this number will be ignored",
+  "type": "INTEGER",
+  "defaultValue": 1
+},
+
+    {
+  "id": "displayUnits",
+  "name": "Select units of distance calculation",
+  "description": "Choose units for the distance calculations. The default units are taken from the map units of the data (mostly meters). Sometimes changing to another unit helps better visualization and/or understanding the data.",
+  "type": "DROPDOWN",
+  "defaultValue": null,
+  "options": [{
+      "value": null,
+      "displayText": "Map unit of data"
+    },
+    {
+      "value": "cm",
+      "displayText": "Centimeters"
+    },
+    {
+      "value": "m",
+      "displayText": "Meters"
+    },
+    {
+      "value": "km",
+      "displayText": "Kilometers"
+    },
+    {
+      "value": "in",
+      "displayText": "Inches"
+    },
+    {
+      "value": "ft",
+      "displayText": "Feet"
+    },
+    {
+      "value": "yd",
+      "displayText": "Yards"
+    },
+    {
+      "value": "mi",
+      "displayText": "Miles"
+    }]
+  }
+],
+  "dependencies": {
+    "R": [
+      {
+        "name": "move"
+      },
+      {
+        "name": "lubridate"
+      },
+      {
+        "name": "ggplot2"
+      },
+      {
+        "name": "sf"
+      },
+      {
+        "name": "units"
+      },
+      {
+        "name": "ggforce"
+      }
+    ]
+  },
+  "createsArtifacts": true,
+  "license": {
+    "key": "GPL-3.0-or-later"
+  },
+  "language": "eng",
+  "keywords": [
+    "cumulative distance",
+    "distance",
+    "sum of steps",
+    "net displacement",
+    "straight line distance",
+    "fist to last point distance"
+  ],
+  "people": [
+    {
+      "firstName": "Anne",
+      "middleInitials": "K",
+      "lastName": "Scharf",
+      "email": "ascharf@ab.mpg.de",
+      "roles": ["author", "creator"],
+      "orcid": "0000-0002-3357-8533",
+      "affiliation": "Max-Planck-Institute of Animal Behavior",
+      "affiliationRor": "https://ror.org/026stee22"
+    }
+  ],
+  "references":[
+  {
+    "type": "HasPart",
+    "note": "Pebesma, E., 2018. Simple Features for R: Standardized Support for Spatial Vector Data. The R Journal 10 (1), 439-446",
+    "url": "https://doi.org/10.32614/RJ-2018-009"
+  }
+ ],
+  "documentation" : {
+    "url": "https://github.com/movestore/DistanceMoved/blob/master/README.md"
+  }
+}
