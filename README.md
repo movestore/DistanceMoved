@@ -5,7 +5,7 @@ MoveApps
 Github repository: https://github.com/movestore/DistanceMoved
 
 ## Description
-Calculation the cumulative or net distance moved per chosen time interval or for the entire tracking period. 
+Calculation of the cumulative or net distance moved per chosen time interval or for the entire tracking period. 
 
 ## Documentation
 This app calculates the distance moved per chosen time interval or for the entire tracking period. The distance can be calculated in two ways:
