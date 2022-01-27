@@ -117,6 +117,9 @@
       },
       {
         "name": "ggforce"
+      },
+      {
+        "name": "viridis"
       }
     ]
   },
