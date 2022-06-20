@@ -3,7 +3,7 @@
     {
   "id": "distMeasure",
   "name": "Distance to be calculated",
-  "description": "Either the the sum of the lenghts of all segments per the chosen time interval below (Cumulative distance), or, the distance between the 1st and last point per chosen time interval below (Net displacement).",
+  "description": "Either the sum of the lenghts of all segments per the chosen time interval below (Cumulative distance), the distance between the 1st and last point per chosen time interval below (Net displacement), or, the maximum straight line distance of the distance matrix between all pairs of locations per chosen time interval below (Maximum net displacement) .",
   "type": "RADIOBUTTONS",
   "defaultValue": null,
   "options": [{
@@ -13,6 +13,10 @@
     {
       "value": "netDisplacement",
       "displayText": "Net displacement"
+    },
+    {
+      "value": "maxNetDisplacement",
+      "displayText": "Maximum net displacement"
     }]
 },
     {

@@ -19,7 +19,7 @@ args <- list()
 #    args[["password"]] = "any-password"
 
 # Add your arguments of your r function here
-args[["distMeasure"]] = "cumulativeDist"#,"netDisplacement", "cumulativeDist"
+args[["distMeasure"]] = "maxNetDisplacement" #,"netDisplacement", "cumulativeDist","maxNetDisplacement"
 args[["time_numb"]] = 12
 args[["time_unit"]] = "hour" # day hour all
 args[["displayUnits"]] = "km"
