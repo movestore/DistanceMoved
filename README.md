@@ -63,14 +63,14 @@ moveStack in Movebank format
 - `DistanceMoved_maxNetDisplacement_in_total.csv`: table with the maximum net displacement of entire track per individual
 
 
-### Parameters
-`Distance to be calculated`: one option has to be chosen: `Cumulative distance`, `Net displacement` or `Maximum net displacement`.
+### Settings
+**Distance to be calculated (`distMeasure`):** one option has to be chosen: `Cumulative distance`, `Net displacement` or `Maximum net displacement`.
 
-`Time unit`: the unit of the time interval for which the distance will be calculated. Available are: `Seconds`, `Minutes`, `Hours`, `Days`, `Month`, `Years`. To select the entire tracking period, `ALL` has to be chosen. Default is `Days`.
+**Time unit (`time_unit`):** the unit of the time interval for which the distance will be calculated. Available are: `Seconds`, `Minutes`, `Hours`, `Days`, `Month`, `Years`. To select the entire tracking period, `ALL` has to be chosen. Default is `Days`.
 
-`Time length`: a number representing the length of the time unit above. The time interval can be for example '5 Minutes', '12 Hours', '3 Month', '1 Years', etc. If `ALL` is selected in the 'Time unit' above, this number will be ignored. Default is `1`.
+**Time length (`time_numb`):** a number representing the length of the time unit above. The time interval can be for example '5 Minutes', '12 Hours', '3 Month', '1 Years', etc. If `ALL` is selected in the 'Time unit' above, this number will be ignored. Default is `1`.
 
-`Select units of distance calculation`: units for the distance calculations. Available are: `Centimeters`, `Meters`, `Kilometers`, `Inches`, `Feet`, `Yards` & `Miles`. Default units are taken from the map units of the data. 
+**Select units of distance calculation (`displayUnits`):** units for the distance calculations. Available are: `Centimeters`, `Meters`, `Kilometers`, `Inches`, `Feet`, `Yards` & `Miles`. Default units are taken from the map units of the data. 
 
 ### Null or error handling
 **Data**: The full input dataset is returned for further use in a next App and cannot be empty.
