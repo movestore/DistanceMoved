@@ -5,6 +5,9 @@ library("viridis")
 library('sf')
 library("units")
 
+# ToDo: add posibility to split track into "column X" 
+# ToDo: write it using more the dplyr functions
+
 rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","maxNetDisplacement"),time_numb=1,time_unit="day",dist_unit="m") { # second, minute, hour, day, month, year, all
   logger.info(paste0("The timezone of your data is: ",tz(mt_time(data))))
 ## sum of all step lenghts per time interval selected  
