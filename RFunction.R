@@ -1,256 +1,211 @@
-library('move')
+library('move2')
 library('lubridate')
 library("ggplot2")
 library("viridis")
 library('sf')
 library("units")
-library("ggforce") # to be able to use unit class in ggplot
 
-## ToDo
-## ? ´add possibility to use local timezone, with "convert Times" app, when all data are in one timezone
-
-
-rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","maxNetDisplacement"),time_numb=1,time_unit="day",displayUnits=NULL) { # second, minute, hour, day, month, year, all
-  logger.info(paste0("The timezone of your data is: ",tz(timestamps(data))))
- 
-## getting units 
-  if(st_crs(crs(data))$IsGeographic){
-    unts <- as_units("m")
-  }else{
-    udunits_from_proj = list( ## function borrowed from R library "sf"
-      #   PROJ.4     UDUNITS
-      `km` =    as_units("km"),
-      `m` =      as_units("m"),
-      `dm` =     as_units("dm"),
-      `cm` =     as_units("cm"),
-      `mm` =     as_units("mm"),
-      `kmi` =    as_units("nautical_mile"),
-      `in` =     as_units("in"),
-      `ft` =     as_units("ft"),
-      `yd` =     as_units("yd"),
-      `mi` =     as_units("mi"),
-      `fath` =   as_units("fathom"),
-      `ch` =     as_units("chain"),
-      `link` =   as_units("link", check_is_valid = FALSE), # not (yet) existing; set in .onLoad()
-      `us-in` =  as_units("us_in", check_is_valid = FALSE),
-      `us-ft` =  as_units("US_survey_foot"),
-      `us-yd` =  as_units("US_survey_yard"),
-      `us-ch` =  as_units("chain"),
-      `us-mi` =  as_units("US_survey_mile"),
-      `ind-yd` = as_units("ind_yd", check_is_valid = FALSE),
-      `ind-ft` = as_units("ind_ft", check_is_valid = FALSE),
-      `ind-ch` = as_units("ind_ch", check_is_valid = FALSE)
-    )
-    unts <- udunits_from_proj[[st_crs(crs(data))$units]]
-  }
-  
+rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","maxNetDisplacement"),time_numb=1,time_unit="day",dist_unit="m") { # second, minute, hour, day, month, year, all
+  logger.info(paste0("The timezone of your data is: ",tz(mt_time(data))))
 ## sum of all step lenghts per time interval selected  
   if(distMeasure=="cumulativeDist"){
     if(time_unit != "all"){
-      dataL <- lapply(split(data), function(moveObj){
-        if(time_unit %in% c("second", "minute", "hour")){roundTS <- round_date(timestamps(moveObj), paste0(time_numb," ",time_unit))}
-        if(time_unit %in% c("day","month","year")){roundTS <- floor_date(timestamps(moveObj), paste0(time_numb," ",time_unit))}
+      dataL <- lapply(split(data,mt_track_id(data)), function(moveObj){
+        if(time_unit %in% c("second", "minute", "hour")){roundTS <- round_date(mt_time(moveObj), paste0(time_numb," ",time_unit))}
+        if(time_unit %in% c("day","month","year")){roundTS <- floor_date(mt_time(moveObj), paste0(time_numb," ",time_unit))}
         
         moveObjSplitTime <- split(moveObj, roundTS)
-        distSplitL <- lapply(moveObjSplitTime, function(x){sum(distance(x))})
+        distSplitL <- lapply(moveObjSplitTime, function(x){sum(mt_distance(x, units=dist_unit),na.rm=T)})
         distSplitTab <- do.call("rbind",distSplitL)
-        distSplitDF <- data.frame(individualID=namesIndiv(moveObj),
-                                  RoundedTimestamp=unique(roundTS),
-                                  DistanceSUM=distSplitTab[,1],
-                                  first_RealTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) timestamps(x)[1])),
-                                  last_RealTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) timestamps(x)[n.locs(x)])),
+        distSplitDF <- data.frame(track_id=unique(mt_track_id(moveObj)),
+                                  rounded_timestamp=unique(roundTS),
+                                  distanceSUM=distSplitTab[,1],
+                                  first_realTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) mt_time(x)[1])),
+                                  last_realTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) mt_time(x)[nrow(x)])),
                                   row.names = NULL)
         return(distSplitDF)
       })
       distSplitDFall <- do.call("rbind",dataL)
       
-      units(distSplitDFall$DistanceSUM) <- as_units(unts)
-      if(!is.null(displayUnits)){units(distSplitDFall$DistanceSUM) <- as_units(displayUnits)}
+      distSplitDFall$distanceSUM <- set_units(distSplitDFall$distanceSUM,dist_unit,mode="standard")
       
-      pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), paste0("plot_DistanceMoved_cumulativeDist_per_",time_numb,time_unit,".pdf")))
-      lapply(split(distSplitDFall,distSplitDFall$individualID), function(z){
-        plotDist <- ggplot(z,aes(RoundedTimestamp,DistanceSUM))+
+      pdf(appArtifactPath(paste0("plot_DistanceMoved_cumulativeDist_per_",time_numb,time_unit,".pdf")))
+      lapply(split(distSplitDFall,distSplitDFall$track_id), function(z){
+        plotDist <- ggplot(z,aes(rounded_timestamp,distanceSUM))+
           geom_line(color="grey")+
           geom_point()+
-          facet_grid(~individualID)+
+          facet_grid(~track_id)+
           theme_bw()+
-          labs(x="", y="Cumulative_Distance")
+          labs(x="", y="Cumulative Distance")
         print(plotDist)
       })
       dev.off()
-      
-      colnames(distSplitDFall)[colnames(distSplitDFall)=="DistanceSUM"] <- paste0("DistanceSUM","_",units(distSplitDFall$DistanceSUM)$numerator)
-      write.csv(distSplitDFall, row.names=F, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),paste0("DistanceMoved_cumulativeDist_per_",time_numb,time_unit,".csv")))
+
+      colnames(distSplitDFall)[colnames(distSplitDFall)=="distanceSUM"] <- paste0("distanceSUM","_",units(distSplitDFall$distanceSUM)$numerator)
+      write.csv(distSplitDFall, row.names=F, file = appArtifactPath(paste0("DistanceMoved_cumulativeDist_per_",time_numb,time_unit,".csv")))
     }
     
     if(time_unit == "all"){
-      dataL <- lapply(split(data), function(moveObj){
-        dist <- sum(distance(moveObj))
-        distDF <- data.frame(individualID=namesIndiv(moveObj),
-                             DistanceSUM=dist,
-                             first_RealTimestamp=timestamps(moveObj)[1],
-                             last_RealTimestamp=timestamps(moveObj)[n.locs(moveObj)],
-                             totalTrackingTime_days=round(as.numeric(timestamps(moveObj)[n.locs(moveObj)]-timestamps(moveObj)[1],unit="days"),2),
+      dataL <- lapply(split(data,mt_track_id(data)), function(moveObj){
+        dist <- sum(mt_distance(moveObj, units=dist_unit),na.rm=T)
+        distDF <- data.frame(track_id=unique(mt_track_id(moveObj)),
+                             distanceSUM=dist,
+                             first_realTimestamp=mt_time(moveObj)[1],
+                             last_realTimestamp=mt_time(moveObj)[nrow(moveObj)],
+                             totalTrackingTime_days=round(as.numeric(mt_time(moveObj)[nrow(moveObj)]-mt_time(moveObj)[1],unit="days"),2),
                              row.names = NULL)
         return(distDF)
       })
       distDFall <- do.call("rbind",dataL)
       
-      units(distDFall$DistanceSUM) <- as_units(unts)
-      if(!is.null(displayUnits)){units(distDFall$DistanceSUM) <- as_units(displayUnits)}
-      
-      pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "plot_DistanceMoved_cumulativeDist_in_total.pdf"),width=10)
-      plotDist <- ggplot(distDFall,aes(individualID,DistanceSUM, color=totalTrackingTime_days))+
+
+      pdf(appArtifactPath("plot_DistanceMoved_cumulativeDist_in_total.pdf"),width=10)
+      plotDist <- ggplot(distDFall,aes(track_id,distanceSUM, color=totalTrackingTime_days))+
         geom_point()+
         theme_bw()+
-        labs(x="Individuals", y="Cumulative_Distance")+
+        labs(x="Individuals", y="Cumulative Distance")+
         theme(axis.text.x = element_text(angle = 90,vjust = 0.5, hjust=1))+
-        scale_color_viridis("tracking time (days)",option="D")
+        scale_color_viridis("tracking time (days)",option="B",end = 0.9, direction=-1)
       print(plotDist)
       dev.off()
       
-      colnames(distDFall)[colnames(distDFall)=="DistanceSUM"] <- paste0("DistanceSUM","_",units(distDFall$DistanceSUM)$numerator)
-      write.csv(distDFall, row.names=F, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"DistanceMoved_cumulativeDist_in_total.csv"))
+      colnames(distDFall)[colnames(distDFall)=="distanceSUM"] <- paste0("distanceSUM","_",units(distDFall$distanceSUM)$numerator)
+      write.csv(distDFall, row.names=F, file = appArtifactPath("DistanceMoved_cumulativeDist_in_total.csv"))
     }
   }
   
 ## straight line (1st-last pt) distance per time step selected  
   if(distMeasure=="netDisplacement"){
     if(time_unit != "all"){
-      dataL <- lapply(split(data), function(moveObj){
-        if(time_unit %in% c("second", "minute", "hour")){roundTS <- round_date(timestamps(moveObj), paste0(time_numb," ",time_unit))}
-        if(time_unit %in% c("day","month","year")){roundTS <- floor_date(timestamps(moveObj), paste0(time_numb," ",time_unit))}
+      dataL <- lapply(split(data,mt_track_id(data)), function(moveObj){
+        if(time_unit %in% c("second", "minute", "hour")){roundTS <- round_date(mt_time(moveObj), paste0(time_numb," ",time_unit))}
+        if(time_unit %in% c("day","month","year")){roundTS <- floor_date(mt_time(moveObj), paste0(time_numb," ",time_unit))}
         
         moveObjSplitTime <- split(moveObj, roundTS)
-        distSplitL <- lapply(moveObjSplitTime, function(x){distance(x[c(1,n.locs(x))])})
+        distSplitL <- lapply(moveObjSplitTime, function(x){mt_distance(x[c(1,nrow(x)),],units=dist_unit)})
         distSplitTab <- do.call("rbind",distSplitL)
-        distSplitDF <- data.frame(individualID=namesIndiv(moveObj),
-                                  RoundedTimestamp=unique(roundTS),
+        distSplitDF <- data.frame(track_id=unique(mt_track_id(moveObj)),
+                                  rounded_timestamp=unique(roundTS),
                                   netDisplacement=distSplitTab[,1],
-                                  first_RealTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) timestamps(x)[1])),
-                                  last_RealTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) timestamps(x)[n.locs(x)])),
+                                  first_realTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) mt_time(x)[1])),
+                                  last_realTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) mt_time(x)[nrow(x)])),
                                   row.names = NULL)
         return(distSplitDF)
       })
       distSplitDFall <- do.call("rbind",dataL)
       
-      units(distSplitDFall$netDisplacement) <- as_units(unts)
-      if(!is.null(displayUnits)){units(distSplitDFall$netDisplacement) <- as_units(displayUnits)}
+      distSplitDFall$netDisplacement <- set_units(distSplitDFall$netDisplacement,dist_unit,mode="standard")
       
-      pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), paste0("plot_DistanceMoved_netDisplacement_per_",time_numb,time_unit,".pdf")))
-      lapply(split(distSplitDFall,distSplitDFall$individualID), function(z){
-        plotDist <- ggplot(z,aes(RoundedTimestamp,netDisplacement))+
+      pdf(appArtifactPath( paste0("plot_DistanceMoved_netDisplacement_per_",time_numb,time_unit,".pdf")))
+      lapply(split(distSplitDFall,distSplitDFall$track_id), function(z){
+        plotDist <- ggplot(z,aes(rounded_timestamp,netDisplacement))+
           geom_line(color="grey")+
           geom_point()+
-          facet_grid(~individualID)+
+          facet_grid(~track_id)+
           theme_bw()+
-          labs(x="", y="Net_Displacement")
+          labs(x="", y="Net Displacement")
         print(plotDist)
       })
       dev.off()
       
       colnames(distSplitDFall)[colnames(distSplitDFall)=="netDisplacement"] <- paste0("netDisplacement","_",units(distSplitDFall$netDisplacement)$numerator)
-      write.csv(distSplitDFall, row.names=F, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),paste0("DistanceMoved_netDisplacement_per_",time_numb,time_unit,".csv")))
+      write.csv(distSplitDFall, row.names=F, file = appArtifactPath(paste0("DistanceMoved_netDisplacement_per_",time_numb,time_unit,".csv")))
     }
     
     if(time_unit == "all"){
-      dataL <- lapply(split(data), function(moveObj){
-        dist <- distance(moveObj[c(1,n.locs(moveObj))])
-        distDF <- data.frame(individualID=namesIndiv(moveObj),
+      dataL <- lapply(split(data,mt_track_id(data)), function(moveObj){
+        dist <- mt_distance(moveObj[c(1,nrow(moveObj)),],units=dist_unit)
+        distDF <- data.frame(track_id=unique(mt_track_id(moveObj)),
                              netDisplacement=dist,
-                             first_RealTimestamp=timestamps(moveObj)[1],
-                             last_RealTimestamp=timestamps(moveObj)[n.locs(moveObj)],
-                             totalTrackingTime_days=round(as.numeric(timestamps(moveObj)[n.locs(moveObj)]-timestamps(moveObj)[1],unit="days"),2),
+                             first_realTimestamp=mt_time(moveObj)[1],
+                             last_realTimestamp=mt_time(moveObj)[nrow(moveObj)],
+                             totalTrackingTime_days=round(as.numeric(mt_time(moveObj)[nrow(moveObj)]-mt_time(moveObj)[1],unit="days"),2),  
                              row.names = NULL)
         return(distDF)
       })
       distDFall <- do.call("rbind",dataL)
       
-      units(distDFall$netDisplacement) <- as_units(unts)
-      if(!is.null(displayUnits)){units(distDFall$netDisplacement) <- as_units(displayUnits)}
-      
-      pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "plot_DistanceMoved_netDisplacement_in_total.pdf"),width=10)
-      plotDist <- ggplot(distDFall,aes(individualID,netDisplacement, color=totalTrackingTime_days))+
+      pdf(appArtifactPath( "plot_DistanceMoved_netDisplacement_in_total.pdf"),width=10)
+      plotDist <- ggplot(distDFall,aes(track_id,netDisplacement, color=totalTrackingTime_days))+
         geom_point()+
         theme_bw()+
-        labs(x="Individuals", y="Net_Displacement")+
+        labs(x="Individuals", y="Net Displacement")+
         theme(axis.text.x = element_text(angle = 90,vjust = 0.5, hjust=1))+
-        scale_color_viridis("tracking time (days)",option="D")
+        scale_color_viridis("tracking time (days)",option="B",end = 0.9, direction=-1)
       print(plotDist)
       dev.off()
       
       colnames(distDFall)[colnames(distDFall)=="netDisplacement"] <- paste0("netDisplacement","_",units(distDFall$netDisplacement)$numerator)
-      write.csv(distDFall, row.names=F, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"DistanceMoved_netDisplacement_in_total.csv"))
+      write.csv(distDFall, row.names=F, file = appArtifactPath("DistanceMoved_netDisplacement_in_total.csv"))
     }
   }
   
   ## maximum distance between any 2 locations per time step selected  
   if(distMeasure=="maxNetDisplacement"){
     if(time_unit != "all"){
-      dataL <- lapply(split(data), function(moveObj){
-        if(time_unit %in% c("second", "minute", "hour")){roundTS <- round_date(timestamps(moveObj), paste0(time_numb," ",time_unit))}
-        if(time_unit %in% c("day","month","year")){roundTS <- floor_date(timestamps(moveObj), paste0(time_numb," ",time_unit))}
+      dataL <- lapply(split(data,mt_track_id(data)), function(moveObj){
+        if(time_unit %in% c("second", "minute", "hour")){roundTS <- round_date(mt_time(moveObj), paste0(time_numb," ",time_unit))}
+        if(time_unit %in% c("day","month","year")){roundTS <- floor_date(mt_time(moveObj), paste0(time_numb," ",time_unit))}
         
         moveObjSplitTime <- split(moveObj, roundTS)
-        distSplitL <- lapply(moveObjSplitTime, function(x){max(pointDistance(coordinates(x), lonlat=T, allpairs=T),na.rm=T)})
+        distSplitL <- lapply(moveObjSplitTime, function(x){max(st_distance(x=x[-nrow(x),],y=x[-1,], by_element=T),na.rm=T)})
         distSplitTab <- do.call("rbind",distSplitL)
-        distSplitDF <- data.frame(individualID=namesIndiv(moveObj),
-                                  RoundedTimestamp=unique(roundTS),
+        distSplitDF <- data.frame(track_id=unique(mt_track_id(moveObj)),
+                                  rounded_timestamp=unique(roundTS),
                                   maxNetDisplacement=distSplitTab[,1],
-                                  first_RealTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) timestamps(x)[1])),
-                                  last_RealTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) timestamps(x)[n.locs(x)])),
+                                  first_realTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) mt_time(x)[1])),
+                                  last_realTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) mt_time(x)[nrow(x)])),
                                   row.names = NULL)
+        distSplitDF$maxNetDisplacement <- set_units(distSplitDF$maxNetDisplacement,units(distSplitL[[1]])$numerator,mode="standard")
         return(distSplitDF)
       })
       distSplitDFall <- do.call("rbind",dataL)
       
-      units(distSplitDFall$maxNetDisplacement) <- as_units(unts)
-      if(!is.null(displayUnits)){units(distSplitDFall$maxNetDisplacement) <- as_units(displayUnits)}
+      distSplitDFall$maxNetDisplacement <- set_units(distSplitDFall$maxNetDisplacement,dist_unit,mode="standard")    
       
-      pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), paste0("plot_DistanceMoved_maxNetDisplacement_per_",time_numb,time_unit,".pdf")))
-      lapply(split(distSplitDFall,distSplitDFall$individualID), function(z){
-        plotDist <- ggplot(z,aes(RoundedTimestamp,maxNetDisplacement))+
+      pdf(appArtifactPath( paste0("plot_DistanceMoved_maxNetDisplacement_per_",time_numb,time_unit,".pdf")))
+      lapply(split(distSplitDFall,distSplitDFall$track_id), function(z){
+        plotDist <- ggplot(z,aes(rounded_timestamp,maxNetDisplacement))+
           geom_line(color="grey")+
           geom_point()+
-          facet_grid(~individualID)+
+          facet_grid(~track_id)+
           theme_bw()+
-          labs(x="", y="Max_Net_Displacement")
+          labs(x="", y="Max Net Displacement")
         print(plotDist)
       })
       dev.off()
       
       colnames(distSplitDFall)[colnames(distSplitDFall)=="maxNetDisplacement"] <- paste0("maxNetDisplacement","_",units(distSplitDFall$maxNetDisplacement)$numerator)
-      write.csv(distSplitDFall, row.names=F, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),paste0("DistanceMoved_maxNetDisplacement_per_",time_numb,time_unit,".csv")))
+      write.csv(distSplitDFall, row.names=F, file = appArtifactPath(paste0("DistanceMoved_maxNetDisplacement_per_",time_numb,time_unit,".csv")))
     }
     
     if(time_unit == "all"){
-      dataL <- lapply(split(data), function(moveObj){
-        dist <- max(pointDistance(coordinates(moveObj), lonlat=T, allpairs=T),na.rm=T)
-        distDF <- data.frame(individualID=namesIndiv(moveObj),
+      dataL <- lapply(split(data,mt_track_id(data)), function(moveObj){
+        dist <- max(st_distance(x=moveObj[-nrow(moveObj),],y=moveObj[-1,], by_element=T),na.rm=T)
+        distDF <- data.frame(track_id=unique(mt_track_id(moveObj)),
                              maxNetDisplacement=dist,
-                             first_RealTimestamp=timestamps(moveObj)[1],
-                             last_RealTimestamp=timestamps(moveObj)[n.locs(moveObj)],
-                             totalTrackingTime_days=round(as.numeric(timestamps(moveObj)[n.locs(moveObj)]-timestamps(moveObj)[1],unit="days"),2),
+                             first_realTimestamp=mt_time(moveObj)[1],
+                             last_realTimestamp=mt_time(moveObj)[nrow(moveObj)],
+                             totalTrackingTime_days=round(as.numeric(mt_time(moveObj)[nrow(moveObj)]-mt_time(moveObj)[1],unit="days"),2),     
                              row.names = NULL)
         return(distDF)
       })
       distDFall <- do.call("rbind",dataL)
       
-      units(distDFall$maxNetDisplacement) <- as_units(unts)
-      if(!is.null(displayUnits)){units(distDFall$maxNetDisplacement) <- as_units(displayUnits)}
+      distDFall$maxNetDisplacement <- set_units(distDFall$maxNetDisplacement,dist_unit,mode="standard")    
       
-      pdf(paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"), "plot_DistanceMoved_maxNetDisplacement_in_total.pdf"),width=10)
-      plotDist <- ggplot(distDFall,aes(individualID,maxNetDisplacement, color=totalTrackingTime_days))+
+      pdf(appArtifactPath( "plot_DistanceMoved_maxNetDisplacement_in_total.pdf"),width=10)
+      plotDist <- ggplot(distDFall,aes(track_id,maxNetDisplacement, color=totalTrackingTime_days))+
         geom_point()+
         theme_bw()+
-        labs(x="Individuals", y="Max_Net_Displacement")+
+        labs(x="Individuals", y="Max Net Displacement")+
         theme(axis.text.x = element_text(angle = 90,vjust = 0.5, hjust=1))+
-        scale_color_viridis("tracking time (days)",option="D")
+        scale_color_viridis("tracking time (days)",option="B",end = 0.9, direction=-1)
       print(plotDist)
       dev.off()
       
       colnames(distDFall)[colnames(distDFall)=="maxNetDisplacement"] <- paste0("maxNetDisplacement","_",units(distDFall$maxNetDisplacement)$numerator)
-      write.csv(distDFall, row.names=F, file = paste0(Sys.getenv(x = "APP_ARTIFACTS_DIR", "/tmp/"),"DistanceMoved_maxNetDisplacement_in_total.csv"))
+      write.csv(distDFall, row.names=F, file = appArtifactPath("DistanceMoved_maxNetDisplacement_in_total.csv"))
     }
   }
   

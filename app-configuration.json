@@ -1,4 +1,6 @@
 {
-    "sdk": "MoveApps R SDK",
-    "year": 2004
+    "distMeasure":"netDisplacement",
+    "time_numb":1,
+    "time_unit":"all",
+    "dist_unit":"km"
 }
