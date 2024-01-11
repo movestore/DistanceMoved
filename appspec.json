@@ -85,24 +85,12 @@
 ],
   "dependencies": {
     "R": [
-      {
-        "name": "move2"
-      },
-      {
-        "name": "lubridate"
-      },
-      {
-        "name": "ggplot2"
-      },
-      {
-        "name": "sf"
-      },
-      {
-        "name": "units"
-      },
-      {
-        "name": "viridis"
-      }
+      {"name": "move2"},
+      {"name": "lubridate"},
+      {"name": "ggplot2"},
+      {"name": "sf"},
+      {"name": "units"},
+      {"name": "viridis"}
     ]
   },
   "createsArtifacts": true,

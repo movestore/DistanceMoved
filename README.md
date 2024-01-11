@@ -78,4 +78,4 @@ move2_locs
 
 ### Null or error handling
 
-**Data**: The full input dataset is returned unmodified for further use in a next App and cannot be empty.
+**Data**: The full input dataset with the addition of the columns `distanceMoved` and `distanceMovedDetails` (the latter containing the information of type of distance measured, time interval and units) is returned for further use in a next App and cannot be empty.
