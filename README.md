@@ -12,13 +12,13 @@ Calculate the cumulative distance moved, net displacement, or maximum net displa
 
 This app calculates the distance moved by each track per a chosen time interval or for the entire tracking period. The distance can be calculated one of in three ways:
 
-***Cumulative distance***: calculates the sum of the length of all segments per chosen time interval or the entire track.
+***Cumulative distance*** calculates the sum of the length of all segments (straight-line distance between consecutive location records in a track) per chosen time interval or the entire track.
 
-***Net displacement***: calculates the distance of the straight line between the first and the last point per chosen time interval or the entire track.
+***Net displacement*** calculates the distance of the straight line between the first and the last point per chosen time interval or the entire track.
 
-***Maximum net displacement***: returns the maximum straight line distance of the distance matrix between all pairs of locations per chosen time interval or the entire track.
+***Maximum net displacement*** calculates the maximum straight-line distance of the distance matrix between all pairs of locations per chosen time interval or the entire track.
 
-The intervals will be defined by rounding timestamps to the chosen interval and determining track segments (consecutive location records) from the data set that fall within each interval. The break point between intervals is defined at the start of the interval: 00 for seconds, minutes or hours; midnight ("00:00:00") UTC on the day; and midnight on the first day of the month or year. In the 'logs' a message will be displayed informing about the time zone of the data.
+The intervals will be defined by rounding timestamps to the chosen interval and determining track segments (consecutive location records) from the data set that fall within each interval. The break point between intervals is defined at the start of the interval: "00" for seconds, minutes or hours; midnight ("00:00:00") UTC on the day; and midnight on the first day of the month or year. The 'logs' will include a message noting the time zone of the data.
 
 ### Input data
 
@@ -30,9 +30,11 @@ move2_locs
 
 ### Artefacts
 
+Two output files are provided, with the content depending on the settings chosen. All .csv tables include include the rounded timestamps defining the interval break points and the first and last timestamp within the data that fall within the chosen interval.
+
 *Cumulative distance per time interval*:
 
--   `plot_DistanceMoved_cumulativeDist_per_TIME-INTERVAL.pdf`: one plot per track, representing the cumulative distance moved for each time interval across the tracking period.
+-   `plot_DistanceMoved_cumulativeDist_per_TIME-INTERVAL.pdf`: one plot per track, representing the cumulative distance moved for each time interval across the tracking period
 
 -   `DistanceMoved_cumulativeDist_per_TIME-INTERVAL.csv`: table containing the cumulative distance values per time interval, per track
 
@@ -68,7 +70,7 @@ move2_locs
 
 ### Settings
 
-**Distance to be calculated (`distMeasure`):** one option has to be chosen: `Cumulative distance`, `Net displacement` or `Maximum net displacement`. *Cumulative distance* calculates the sum of the length of all segments per chosen time interval or the entire track. *Net displacement* calculates the distance of the straight line between the 1st and the last point per chosen time interval or the entire track. *Maximum net displacement* returns the maximum straight line distance of the distance matrix between all pairs of locations per chosen time interval or the entire track.
+**Distance to be calculated (`distMeasure`):** one option has to be chosen: `Cumulative distance`, `Net displacement` or `Maximum net displacement`. *Cumulative distance* calculates the sum of the length of all segments per chosen time interval or the entire track. *Net displacement* calculates the distance of the straight line between the first and the last point per chosen time interval or the entire track. *Maximum net displacement* returns the maximum straight line distance of the distance matrix between all pairs of locations per chosen time interval or the entire track.
 
 **Time unit (`time_unit`):** the unit of the time interval for which the distance will be calculated. Available are: `Seconds`, `Minutes`, `Hours`, `Days`, `Month`, `Years`. To select the entire tracking period, `ALL` has to be chosen. Default is `Days`.
 
