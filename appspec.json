@@ -4,9 +4,9 @@
     {
   "id": "distMeasure",
   "name": "Distance to be calculated",
-  "description": "Either the sum of the lenghts of all segments per the chosen time interval (Cumulative distance), the distance between the 1st and last point per chosen time interval (Net displacement), or, the maximum straight line distance of the distance matrix between all pairs of locations per chosen time interval (Maximum net displacement) .",
+  "description": "Choose to calculate movements over specified time intervals as the cumulative distance (sum of the lengths of all segments), net displacement (distance between the first and last locations), or maximum net displacement (the maximum straight-line distance of the distance matrix between all pairs of locations).",
   "type": "RADIOBUTTONS",
-  "defaultValue": null,
+  "defaultValue": "cumulativeDist",
   "options": [{
       "value": "cumulativeDist",
       "displayText": "Cumulative distance"
@@ -23,7 +23,7 @@
     {
   "id": "time_unit",
   "name": "Time unit",
-  "description": "The unit of the time interval for which the distance will be calculated. If 'ALL' is selected, than the distance will be calculated for the entire tracking period.",
+  "description": "The unit of the time interval over which the distance will be calculated. If 'ALL' is selected, than one distance will be calculated across all data for each track.",
   "type": "DROPDOWN",
   "defaultValue": "day", 
   "options": [{
@@ -58,15 +58,15 @@
 {
   "id": "time_numb",
   "name": "Time length",
-  "description": "The length of the time unit above. The time interval can be for example '5 minutes', '12 hours', '3 month', '1 year', etc. If 'ALL' is selected in the 'Time unit' above, this number will be ignored.",
+  "description": "The length of the time in the unit selected above. For example, this interval can be for example '5 minutes', '12 hours', '3 months' or '1 year'. If 'ALL' is selected in the 'Time unit' above, this number will be ignored.",
   "type": "INTEGER",
   "defaultValue": 1
 },
 
     {
   "id": "dist_unit",
-  "name": "Select units of distance calculation",
-  "description": "Choose units for the distance calculations. Default in meters.",
+  "name": "Distance unit",
+  "description": "Choose units in which to report the calculated distances. Default is meters.",
   "type": "DROPDOWN",
   "defaultValue": "m",
   "options": [
