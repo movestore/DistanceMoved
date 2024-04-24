@@ -21,6 +21,13 @@
     }]
 },
     {
+  "id": "time_numb",
+  "name": "Time length",
+  "description": "The length of the time in the unit selected above. For example, this interval can be for example '5 minutes', '12 hours', '3 months' or '1 year'. If 'ALL' is selected in the 'Time unit' above, this number will be ignored.",
+  "type": "INTEGER",
+  "defaultValue": 1
+},
+    {
   "id": "time_unit",
   "name": "Time unit",
   "description": "The unit of the time interval over which the distance will be calculated. If 'ALL' is selected, than one distance will be calculated across all data for each track.",
@@ -55,14 +62,6 @@
       "displayText": "ALL"
     }]
 },
-{
-  "id": "time_numb",
-  "name": "Time length",
-  "description": "The length of the time in the unit selected above. For example, this interval can be for example '5 minutes', '12 hours', '3 months' or '1 year'. If 'ALL' is selected in the 'Time unit' above, this number will be ignored.",
-  "type": "INTEGER",
-  "defaultValue": 1
-},
-
     {
   "id": "dist_unit",
   "name": "Distance unit",
