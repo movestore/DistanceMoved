@@ -23,7 +23,7 @@
     {
   "id": "time_numb",
   "name": "Time length",
-  "description": "The length of the time in the unit selected above. For example, this interval can be for example '5 minutes', '12 hours', '3 months' or '1 year'. If 'ALL' is selected in the 'Time unit' above, this number will be ignored.",
+  "description": "The length of the time in the unit selected below. For example, this interval can be for example '5 minutes', '12 hours', '3 months' or '1 year'. If 'ALL' is selected in the 'Time unit' below, this number will be ignored.",
   "type": "INTEGER",
   "defaultValue": 1
 },
