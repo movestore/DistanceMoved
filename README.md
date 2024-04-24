@@ -74,9 +74,9 @@ Two output files are provided, with the content depending on the settings chosen
 
 **Distance to be calculated (`distMeasure`):** one option has to be chosen: `Cumulative distance`, `Net displacement` or `Maximum net displacement`. *Cumulative distance* calculates the sum of the length of all segments per chosen time interval or the entire track. *Net displacement* calculates the distance of the straight line between the first and the last point per chosen time interval or the entire track. *Maximum net displacement* returns the maximum straight line distance of the distance matrix between all pairs of locations per chosen time interval or the entire track.
 
-**Time unit (`time_unit`):** the unit of the time interval for which the distance will be calculated. Available are: `Seconds`, `Minutes`, `Hours`, `Days`, `Month`, `Years`. To select the entire tracking period, `ALL` has to be chosen. Default is `Days`.
-
 **Time length (`time_numb`):** a number representing the length of the time unit above. The time interval can be for example '5 Minutes', '12 Hours', '3 Month', '1 Years', etc. If `ALL` is selected in the 'Time unit' above, this number will be ignored. Default is `1`.
+
+**Time unit (`time_unit`):** the unit of the time interval for which the distance will be calculated. Available are: `Seconds`, `Minutes`, `Hours`, `Days`, `Month`, `Years`. To select the entire tracking period, `ALL` has to be chosen. Default is `Days`.
 
 **Distance unit (`dist_unit`):** units for the distance calculations. Available are: `Centimeters`, `Meters` & `Kilometers`. Default is `Meters`.
 
