@@ -18,7 +18,9 @@ This app calculates the distance moved by each track per a chosen time interval 
 
 ***Maximum net displacement*** calculates the maximum straight-line distance of the distance matrix between all pairs of locations per chosen time interval or the entire track.
 
-The intervals will be defined by rounding timestamps to the chosen interval and determining track segments (consecutive location records) from the data set that fall within each interval. The break point between intervals is defined at the start of the interval: "00" for seconds, minutes or hours; midnight ("00:00:00") UTC on the day; and midnight on the first day of the month or year. The 'logs' will include a message noting the time zone of the data.
+The intervals will be defined by rounding timestamps to the chosen interval and determining track segments (consecutive location records) from the data set that fall within each interval. The break point between intervals is defined at the start of the interval: "00" for seconds, minutes or hours; midnight ("00:00:00") UTC on the day; and midnight on the first day of the month or year. 
+
+The 'logs' will include a message noting the time zone of the data, this can be important for the interpretation of the results. For example if the selected time unit is hour, to correctly interpret what time of the day the animal is experiencing it is important to know in which timezone these hours are represented.
 
 ### Input data
 
