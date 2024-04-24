@@ -10,6 +10,7 @@ library("units")
 
 rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","maxNetDisplacement"),time_numb=1,time_unit="day",dist_unit="m") { # second, minute, hour, day, month, year, all
   logger.info(paste0("The timezone of your data is: ",tz(mt_time(data))))
+  if(is.null(distMeasure)){stop("Please select an option in the setting 'Distance to be calculated'", call.=F)}
 ## sum of all step lenghts per time interval selected  
   if(distMeasure=="cumulativeDist"){
     if(time_unit != "all"){
@@ -20,7 +21,7 @@ rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","m
         moveObjSplitTime <- split(moveObj, roundTS)
         distSplitL <- lapply(moveObjSplitTime, function(x){sum(mt_distance(x, units=dist_unit),na.rm=T)})
         distSplitTab <- do.call("rbind",distSplitL)
-        distSplitDF <- data.frame(track_id=unique(mt_track_id(moveObj)),
+        distSplitDF <- data.frame(track_id=if(class(mt_track_id(moveObj))=="factor"){unique(as.character(mt_track_id(moveObj)))}else{unique(mt_track_id(moveObj))},
                                   rounded_timestamp=unique(roundTS),
                                   distanceSUM=distSplitTab[,1],
                                   first_realTimestamp=do.call("c",lapply(moveObjSplitTime, function(x) mt_time(x)[1])),
@@ -72,8 +73,8 @@ rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","m
       distDFall <- do.call("rbind",dataL)
       
       data$distanceMoved <- NA
-      for(i in 1:nrow(distSplitDFall)){
-        data$distanceMoved[mt_track_id(data)==distSplitDFall$track_id[i]] <- distSplitDFall$distanceSUM[i]
+      for(i in 1:nrow(distDFall)){
+        data$distanceMoved[mt_track_id(data)==distDFall$track_id[i]] <- distDFall$distanceSUM[i]
       }
       data$distanceMovedDetails <- paste0(distMeasure,"_per_","entire_track","_in_",dist_unit)
 
@@ -152,8 +153,8 @@ rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","m
       distDFall <- do.call("rbind",dataL)
       
       data$distanceMoved <- NA
-      for(i in 1:nrow(distSplitDFall)){
-        data$distanceMoved[mt_track_id(data)==distSplitDFall$track_id[i]] <- distSplitDFall$netDisplacement[i]
+      for(i in 1:nrow(distDFall)){
+        data$distanceMoved[mt_track_id(data)==distDFall$track_id[i]] <- distDFall$netDisplacement[i]
       }
       data$distanceMovedDetails <- paste0(distMeasure,"_per_","entire_track","_in_",dist_unit)
       
@@ -236,8 +237,8 @@ rFunction <-  function(data, distMeasure=c("cumulativeDist","netDisplacement","m
       distDFall$maxNetDisplacement <- set_units(distDFall$maxNetDisplacement,dist_unit,mode="standard")    
       
       data$distanceMoved <- NA
-      for(i in 1:nrow(distSplitDFall)){
-        data$distanceMoved[mt_track_id(data)==distSplitDFall$track_id[i]] <- distSplitDFall$maxNetDisplacement[i]
+      for(i in 1:nrow(distDFall)){
+        data$distanceMoved[mt_track_id(data)==distDFall$track_id[i]] <- distDFall$maxNetDisplacement[i]
       }
       data$distanceMovedDetails <- paste0(distMeasure,"_per_","entire_track","_in_",dist_unit)
       
