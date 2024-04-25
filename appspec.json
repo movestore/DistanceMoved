@@ -5,8 +5,7 @@
   "id": "distMeasure",
   "name": "Distance to be calculated",
   "description": "Choose to calculate movements over specified time intervals as the cumulative distance (sum of the lengths of all segments), net displacement (distance between the first and last locations), or maximum net displacement (the maximum straight-line distance of the distance matrix between all pairs of locations).",
-  "type": "RADIOBUTTONS",
-  "defaultValue": null,
+  "type": "RADIOBUTTONS",  
   "options": [{
       "value": "cumulativeDist",
       "displayText": "Cumulative distance"
